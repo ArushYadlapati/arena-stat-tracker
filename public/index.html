@@ -10,8 +10,39 @@
             max-width: 800px;
             margin: auto;
             padding: 2rem;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
-        h1 { text-align: center; }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        h1 {
+            text-align: center;
+            margin: 0;
+        }
+        .github-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        .github-button:hover {
+            background-color: #f0f0f0;
+        }
+        .github-icon {
+            width: 24px;
+            height: 24px;
+        }
+        .main-content {
+            flex: 1;
+        }
         .stat-list { margin-top: 2rem; display: flex; flex-direction: column; gap: 0.5rem; }
         .stat-item {
             display: flex;
@@ -41,40 +72,80 @@
         .add-button {
             padding: 0.25rem 0.75rem;
         }
+        .footer {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid #ddd;
+            text-align: center;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        .footer h4 {
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+        .footer ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .footer li {
+            margin: 0.25rem 0;
+        }
+        .footer a {
+            color: #0066cc;
+            text-decoration: none;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
-<h1>Arena Stat Tracker</h1>
+<div class="main-content">
+    <div class="header">
+        <h1>Arena Stat Tracker</h1>
+        <button class="github-button" onclick="window.open('https://github.com/ArushYadlapati/arena-stat-tracker', '_blank')" title="View on GitHub">
+            <svg class="github-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+            </svg>
+        </button>
+    </div>
 
-<label for="shareHolder">Stat Share Holder (%):</label>
-<input type="number" id="shareHolder" placeholder="e.g. 30" onchange="updateStats()" />
+    <label for="shareHolder">Stat Share Holder (%):</label>
+    <input type="number" id="shareHolder" placeholder="e.g. 30" onchange="updateStats()" />
 
-<div class="stat-list" id="statList"></div>
+    <div class="stat-list" id="statList"></div>
 
-<h3>Total Stats:</h3>
-<div id="summary"></div>
+    <h3>Total Stats:</h3>
+    <div id="summary"></div>
+</div>
+
+<footer class="footer">
+    <p>Made with ❤️ by Maksi (<a href="mailto:maksj6@gmail.com">maksj6@gmail.com</a>) and Arush Y (<a href="mailto:arush.yadlapati@gmail.com">arush.yadlapati@gmail.com</a>)</p>
+</footer>
 
 <script>
     const statIcons = {
-        "Health": "/public/stat-images/Health_colored_icon.jpg",
-        "Attack Damage": "StatImages/JpgFile/Attack_damage_colored_icon.jpg",
-        "Ability Power": "StatImages/JpgFile/Ability_power_colored_icon.jpg",
-        "Attack Speed": "StatImages/JpgFile/Attack_speed_colored_icon.jpg",
-        "Ability Haste": "StatImages/JpgFile/Ability_haste_colored_icon.jpg",
-        "Armor": "StatImages/JpgFile/Armor_colored_icon.jpg",
-        "Magic Resist": "StatImages/JpgFile/Magic_resistance_colored_icon.jpg",
-        "Movement Speed": "StatImages/JpgFile/Movement_speed_colored_icon.jpg",
-        "Movement Speed %": "StatImages/JpgFile/Movement_speed_colored_icon.jpg",
-        "Lethality": "StatImages/JpgFile/Armor_penetration_colored_icon.jpg",
-        "Fortune": "StatImages/JpgFile/Gold_icon.jpg",
-        "Crit Chance": "StatImages/JpgFile/Critical_strike_chance_colored_icon.jpg",
-        "Magic Penetration %": "StatImages/JpgFile/Magic_penetration_colored_icon.jpg",
-        "Magic Penetration": "StatImages/JpgFile/Magic_penetration_colored_icon.jpg",
-        "Tenacity": "StatImages/JpgFile/Tenacity_colored_icon.jpg",
-        "Crit Damage": "StatImages/JpgFile/Critical_strike_damage_icon.jpg",
-        "Armor Penetration": "StatImages/JpgFile/Armor_penetration_colored_icon.jpg",
-        "Omnivamp": "StatImages/JpgFile/Omnivamp_colored_icon.jpg",
-        "Heal & Shield Power": "StatImages/JpgFile/Heal_and_shield_power_colored_icon.jpg"
+        "Health": "/stat-images/Health_colored_icon.jpg",
+        "Attack Damage": "/stat-images/Attack_damage_colored_icon.jpg",
+        "Ability Power": "/stat-images/Ability_power_colored_icon.jpg",
+        "Attack Speed": "/stat-images/Attack_speed_colored_icon.jpg",
+        "Ability Haste": "/stat-images/Ability_haste_colored_icon.jpg",
+        "Armor": "/stat-images/Armor_colored_icon.jpg",
+        "Magic Resist": "/stat-images/Magic_resistance_colored_icon.jpg",
+        "Movement Speed": "/stat-images/Movement_speed_colored_icon.jpg",
+        "Movement Speed %": "/stat-images/Movement_speed_colored_icon.jpg",
+        "Lethality": "/stat-images/Armor_penetration_colored_icon.jpg",
+        "Fortune": "/stat-images/Gold_icon.jpg",
+        "Crit Chance": "/stat-images/Critical_strike_chance_colored_icon.jpg",
+        "Magic Penetration %": "/stat-images/Magic_penetration_colored_icon.jpg",
+        "Magic Penetration": "/stat-images/Magic_penetration_colored_icon.jpg",
+        "Tenacity": "/stat-images/Tenacity_colored_icon.jpg",
+        "Crit Damage": "/stat-images/Critical_strike_damage_icon.jpg",
+        "Armor Penetration": "/stat-images/Armor_penetration_colored_icon.jpg",
+        "Omnivamp": "/stat-images/Omnivamp_colored_icon.jpg",
+        "Heal & Shield Power": "/stat-images/Heal_and_shield_power_colored_icon.jpg"
     };
 
     const allStats = Object.keys(statIcons);

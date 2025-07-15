@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Arena Stat Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: auto;
+            padding: 2rem;
+        }
+        h1 { text-align: center; }
+        .stat-list { margin-top: 2rem; display: flex; flex-direction: column; gap: 0.5rem; }
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 1.1rem;
+            border-bottom: 1px solid #ccc;
+            padding: 0.5rem;
+        }
+        .stat-icon {
+            width: 24px;
+            height: 24px;
+        }
+        .stat-name {
+            flex: 1;
+        }
+        .stat-value-input {
+            width: 80px;
+        }
+        .stat-value-result {
+            font-weight: bold;
+        }
+        label, input {
+            margin-top: 1rem;
+            display: block;
+        }
+        .add-button {
+            padding: 0.25rem 0.75rem;
+        }
+    </style>
+</head>
+<body>
+<h1>Arena Stat Tracker</h1>
+
+<label for="shareHolder">Stat Share Holder (%):</label>
+<input type="number" id="shareHolder" placeholder="e.g. 30" onchange="updateStats()" />
+
+<div class="stat-list" id="statList"></div>
+
+<h3>Total Stats:</h3>
+<div id="summary"></div>
+
+<script>
+    const statIcons = {
+        "Health": "./public/stat-images/Health_colored_icon.jpg",
+        "Attack Damage": "StatImages/JpgFile/Attack_damage_colored_icon.jpg",
+        "Ability Power": "StatImages/JpgFile/Ability_power_colored_icon.jpg",
+        "Attack Speed": "StatImages/JpgFile/Attack_speed_colored_icon.jpg",
+        "Ability Haste": "StatImages/JpgFile/Ability_haste_colored_icon.jpg",
+        "Armor": "StatImages/JpgFile/Armor_colored_icon.jpg",
+        "Magic Resist": "StatImages/JpgFile/Magic_resistance_colored_icon.jpg",
+        "Movement Speed": "StatImages/JpgFile/Movement_speed_colored_icon.jpg",
+        "Movement Speed %": "StatImages/JpgFile/Movement_speed_colored_icon.jpg",
+        "Lethality": "StatImages/JpgFile/Armor_penetration_colored_icon.jpg",
+        "Fortune": "StatImages/JpgFile/Gold_icon.jpg",
+        "Crit Chance": "StatImages/JpgFile/Critical_strike_chance_colored_icon.jpg",
+        "Magic Penetration %": "StatImages/JpgFile/Magic_penetration_colored_icon.jpg",
+        "Magic Penetration": "StatImages/JpgFile/Magic_penetration_colored_icon.jpg",
+        "Tenacity": "StatImages/JpgFile/Tenacity_colored_icon.jpg",
+        "Crit Damage": "StatImages/JpgFile/Critical_strike_damage_icon.jpg",
+        "Armor Penetration": "StatImages/JpgFile/Armor_penetration_colored_icon.jpg",
+        "Omnivamp": "StatImages/JpgFile/Omnivamp_colored_icon.jpg",
+        "Heal & Shield Power": "StatImages/JpgFile/Heal_and_shield_power_colored_icon.jpg"
+    };
+
+    const allStats = Object.keys(statIcons);
+    const stats = {
+        "Movement Speed": 0,
+        "Movement Speed %": 0
+    };
+
+    function isPercentStat(stat) {
+        const percentStats = [
+            "Attack Speed", "Crit Chance", "Magic Penetration %",
+            "Tenacity", "Crit Damage", "Armor Penetration",
+            "Omnivamp", "Heal & Shield Power", "Movement Speed %"
+        ];
+        return percentStats.includes(stat);
+    }
+
+    function createStatRow(stat) {
+        const container = document.createElement("div");
+        container.className = "stat-item";
+
+        const icon = document.createElement("img");
+        icon.className = "stat-icon";
+        icon.src = statIcons[stat];
+
+        const name = document.createElement("span");
+        name.className = "stat-name";
+        name.innerText = stat;
+
+        const input = document.createElement("input");
+        input.className = "stat-value-input";
+        input.type = "number";
+        input.placeholder = "+ stat";
+
+        const button = document.createElement("button");
+        button.innerText = "+";
+        button.className = "add-button";
+        button.onclick = () => {
+            const val = parseFloat(input.value);
+            if (!isNaN(val)) {
+                if (stat === "Movement Speed %") {
+                    const base = stats["Movement Speed"] || 0;
+                    stats["Movement Speed"] = base * (1 + val / 100);
+                } else {
+                    stats[stat] = (stats[stat] || 0) + val;
+                }
+                input.value = "";
+                updateStats();
+            }
+        };
+
+        const result = document.createElement("span");
+        result.className = "stat-value-result";
+        result.id = `result-${stat}`;
+        result.innerText = "0";
+
+        container.appendChild(icon);
+        container.appendChild(name);
+        container.appendChild(input);
+        container.appendChild(button);
+        container.appendChild(result);
+
+        return container;
+    }
+
+    function round(value) {
+        return Math.round(value);
+    }
+
+    function updateStats() {
+        const shareHolder = parseFloat(document.getElementById("shareHolder").value || 0);
+        const multiplier = 1 + shareHolder / 100;
+
+        let totalFlat = {};
+        let totalPercent = {};
+
+        allStats.forEach(stat => {
+            const base = stats[stat] || 0;
+            const finalValue = base * multiplier;
+            if (document.getElementById(`result-${stat}`)) {
+                document.getElementById(`result-${stat}`).innerText = finalValue.toFixed(2) + (isPercentStat(stat) ? '%' : '');
+            }
+
+            if (isPercentStat(stat)) {
+                totalPercent[stat] = finalValue;
+            } else {
+                totalFlat[stat] = finalValue;
+            }
+        });
+
+        let summaryHTML = "<b>Flat Stats:</b><ul>";
+        for (let key in totalFlat) {
+            if (key === "Movement Speed") {
+                summaryHTML += `<li>Movement Speed: ${round(totalFlat[key])}</li>`;
+            } else {
+                summaryHTML += `<li>${key}: ${round(totalFlat[key])}</li>`;
+            }
+        }
+        summaryHTML += "</ul><b>Percent Stats:</b><ul>";
+        for (let key in totalPercent) {
+            if (key !== "Movement Speed %") {
+                summaryHTML += `<li>${key}: ${totalPercent[key].toFixed(2)}%</li>`;
+            }
+        }
+        summaryHTML += "</ul>";
+
+        document.getElementById("summary").innerHTML = summaryHTML;
+    }
+
+    window.onload = () => {
+        const statList = document.getElementById("statList");
+        allStats.forEach(stat => {
+            const row = createStatRow(stat);
+            statList.appendChild(row);
+            if (!(stat in stats)) stats[stat] = 0;
+        });
+    };
+</script>
+</body>
+</html>
